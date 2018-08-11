@@ -35,7 +35,6 @@
   "Checks whether a list is an assoc list of productions and q-values"
   (and (consp lst)
 	   (every #'consp lst)
-	   ;;(every #'(lambda (x) (= 2 (length x))) lst)
 	   (every #'symbolp (mapcar #'car lst))
 	   (every #'numberp (mapcar #'cdr lst))))
 
@@ -47,6 +46,7 @@
 	(length limited)))
   
 (defun boltzmann-policy (qlist temp)
+  "Chooses a production with probability proportional to its Q-value" 
   (when (q-list? qlist)
 	(let* ((qvals (mapcar #'cdr qlist))
 		   (expq (mapcar #'(lambda (x) (exp (/ x temp)))
@@ -58,7 +58,8 @@
 						  ii)))
 	  (car (nth (needle cumul) qlist))))) 
 
-(defun update-q-value (q reward alpha gamma elapsed-time qnext)
+(defun calculate-q-value (q reward alpha gamma elapsed-time qnext)
+  "Calculates the new Q-value, given the classical arguments plys the elapsed time"
   (+ q
 	 (* alpha
 		(+ reward (* (expt gamma elapsed-time)
@@ -66,3 +67,31 @@
 		   (* -1 q)))))
 	 
 
+(define-module-fct 'act-rl '()
+  (list (define-parameter
+			:learning-rate
+			:documentation "Learning rate alpha"
+			:default-value .1
+			:valid-test #'(lambda (alpha)
+							(and (numberp alpha)
+								 (>= alpha 0)))
+			:warning "Non-negative number"
+			:owner t)
+		(define-parameter
+			:temporal-discount
+			:documentation "Temporal discount gamma"
+			:default-value 0.99
+			:valid-test #'(lambda (gamma)
+							(and (numberp gamma)
+								 (> gamma 0)
+								 (<= gamma 1))))
+		(define-parameter
+			:depth
+			:documentation "Number of backpropagation steps"
+			:default-value 1  ;; Standard Q-Learning / SARSA
+			:valid-test #'(lambda (n)
+							(and (integerp n)
+								 (plusp n))))
+		(define-parameter :esc :owner nil))
+  :version "1.0a1"
+  :documentation "First version of RL module")
