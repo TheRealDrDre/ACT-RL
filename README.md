@@ -40,13 +40,15 @@ This system by itself cannot handle non-markov environments. That is not a probl
 
 1. 	_Q_(pi-1) = Q(pi-1) + α[R + γQ(pi) - Q(pi-1)]
 2. 	_Q_(pi-2) = Q(pi-2) + α[R + γQ(pi-1) - Q(pi-2)]
-...
+..+ ...
 _n_. 	_Q_(pi-n) = Q(pi-n) + α[R + γQ(pi-n+1) - Q(pi-n)]
 
 ### Handling Continuous Time
 
 The main problem with ACT-R is that time decays linearly, producing negative rewards when unchecked. In the expressed equation, the recursive use of γQ(pi) guarantees that reward propagates back with exponentially declining returns with the number of steps. However, ACT-R needs to handle varying intervals between rewards. The simplest trick is to scale the parameter γ with a time-encoding exponent, so that events immediately attached have a value close to γ = 1:
 
-γ = γ^(_t_(_i_) - _t_(_i_-1)
+γ = γ^[_t_(_i_) - _t_(_i_-1)]
 
-in which _t_(_i_) is the time at which production _pi_ fires. The time scale (seconds, minutes) can be easily adjusted by a scalar value.
+in which _t_(_i_) is the time at which production _pi_ fires. The time scale (seconds, minutes) can be easily adjusted by a scalar value.  Here is an example of how the temporal discount parameter γ decays with the elapsed time, over a span of 10 minutes (600 seconds):
+
+
