@@ -4,11 +4,10 @@ A module to replace ACT-R's utility module with classic RL theory algorithms
 
 ## Current Implementation
 
-![equation](http://latex.codecogs.com/gif.latex?Concentration%3D%5Cfrac%7BTotalTemplate%7D%7BTotalVolume%7D)  
 
-$U_p = U_p + \alpha[R_t - U_p]$
+http://latex.codecogs.com/gif.download?%24%20U_p%20%3D%20U_p%20+%20%5Calpha%5BR_t%20-%20U_p%5D%20%24
 
-Where Rt = R - t(Up), and t(Up) is the elapsed since the firing of Up. 
+Where http://latex.codecogs.com/gif.download?%5Cinline%20R_t%20%3D%20R%20-%20t%28U_p%29, and http://latex.codecogs.com/gif.download?%5Cinline%20t%28U_p%29 is the elapsed since the firing of Up. 
 
 ## Why a New Implementation
 
@@ -16,7 +15,7 @@ The standard, utility-based implementation suffers from a few problems. First, i
 
 Similarly, this system cannot take into account individual differences in temporal discounting, which we know exists. Again, they could be rephrased in terms of different values for R, but this seems unrealistic since they wouild produce different behaviros for short term as well.
 
-Q-Learning in ACT-R
+## Q-Learning in ACT-R
 
 In Q learning, actions a1 … an  are tied to a state s1 … sn. The value Q(s,a) of an action a updated according to the equation:
 
@@ -30,4 +29,3 @@ After the i-th production pi  is selected, update the previous production pi-1 a
 
 Q(pi) = Q(pi) + α[R + γQ(pi+1) - Q(pi)]
 
-Here it is, in Lisp pseudocode:
