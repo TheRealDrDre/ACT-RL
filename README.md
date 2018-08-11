@@ -51,4 +51,4 @@ The main problem with ACT-R is that time decays linearly, producing negative rew
 
 in which _t_(_i_) is the time at which production _pi_ fires. The time scale (seconds, minutes) can be easily adjusted by a scalar value.  Here is an example of how the temporal discount parameter γ decays with the elapsed time, over a span of 10 minutes (600 seconds):
 
-
+![Effect of Time on Temporal Discounting](https://github.com/TheRealDrDre/ACT-RL/blob/master/temp-discount-decay.png)
