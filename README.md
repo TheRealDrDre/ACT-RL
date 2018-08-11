@@ -5,7 +5,7 @@ A module to replace ACT-R's utility module with classic RL theory algorithms
 ## Current Implementation
 
 
-http://latex.codecogs.com/gif.download?%24%20U_p%20%3D%20U_p%20+%20%5Calpha%5BR_t%20-%20U_p%5D%20%24
+![eqn1]http://latex.codecogs.com/gif.download?%24%20U_p%20%3D%20U_p%20+%20%5Calpha%5BR_t%20-%20U_p%5D%20%24
 
 Where http://latex.codecogs.com/gif.download?%5Cinline%20R_t%20%3D%20R%20-%20t%28U_p%29, and http://latex.codecogs.com/gif.download?%5Cinline%20t%28U_p%29 is the elapsed since the firing of Up. 
 
