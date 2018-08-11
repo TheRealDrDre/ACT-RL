@@ -4,6 +4,8 @@ A module to replace ACT-R's utility module with classic RL theory algorithms
 
 ## Current Implementation
 
+![equation](http://latex.codecogs.com/gif.latex?Concentration%3D%5Cfrac%7BTotalTemplate%7D%7BTotalVolume%7D)  
+
 $U_p = U_p + \alpha[R_t - U_p]$
 
 Where Rt = R - t(Up), and t(Up) is the elapsed since the firing of Up. 
