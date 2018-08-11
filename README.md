@@ -1,10 +1,10 @@
 # ACT-RL
 
-A module to replace ACT-R's utility module with classic RL theory algorithms
+This repo is part of a project to replace ACT-R's utility module with classic RL theory algorithms. The code is still unusable and needs to be implemented. The plan is roughly outlined here.  
 
-## Current Implementation
+## Utiliy-based Action Selection in ACT-R
 
-The Utility _Up_ of a production _p_ is currently calculated as:
+In ACT-R, action selection is based on production *utility*. The Utility _Up_ of a production _p_ is currently calculated as:
 
 ... _Up_ = _Up_ + α(_Rt_ - _Up_)
 
