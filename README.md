@@ -4,7 +4,7 @@ A module to replace ACT-R's utility module with classic RL theory algorithms
 
 ## Current Implementation
 
-U_p = U_p + α[Rt - Up]
+$U_p = U_p + \alpha[R_t - U_p]$
 
 Where Rt = R - t(Up), and t(Up) is the elapsed since the firing of Up. 
 
