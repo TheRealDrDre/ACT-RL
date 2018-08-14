@@ -41,13 +41,6 @@
 
 ;;; Data structures
 
-(defun q-list? (lst)
-  "Checks whether a list is an assoc list of productions and q-values"
-  (and (consp lst)
-	   (every #'consp lst)
-	   (every #'symbolp (mapcar #'car lst))
-	   (every #'numberp (mapcar #'cdr lst))))
-
 (defclass act-rl-module ()
   ((q-table :accessor q-table
 			:initform (make-hash-table))
@@ -58,15 +51,27 @@
   (:documentation "An ACT-R module that replaces utility with classic Q-values "))
 
 
-(defmethod q-value (prod module)
-  "Returns the q-value associated with a give production in a Q-module"
-  (unless (null module)
-	(let ((qtable (q-table module)))
-	  (unless (member prod (hash-table-keys qtable))
-		(let ((
-		(setf (gethash prod qtable) 
-		  
+(defun q-list? (lst)
+  "Checks whether a list is an assoc list of productions and q-values"
+  (and (consp lst)
+	   (every #'consp lst)
+	   (every #'symbolp (mapcar #'car lst))
+	   (every #'numberp (mapcar #'cdr lst))))
 
+
+(defmethod q-value (prod)
+  "Returns the q-value associated with a give production in a Q-module"
+  (let ((mod (get-module 'actrl)))
+	(unless (null mod)
+	  (let ((qtable (q-table mod)))
+		(unless (member prod (hash-table-keys qtable))
+		  (let ((
+				 (setf (gethash prod qtable) 
+					   ())))))))))
+
+(defmethod set-q-value (prod)
+  ())
+					   
 (defun create-q-list (cset)
   "Creates an production/q-value assoc list from a conflict set"
   (mapcar #'(lambda (x)
@@ -95,7 +100,7 @@
 		   (* -1 q)))))
 
 
-(define-module-fct 'act-rl '()
+(define-module-fct 'rl '()
   (list (define-parameter
 			:learning-rate
 			:documentation "Learning rate alpha"
@@ -105,14 +110,6 @@
 								 (>= alpha 0)))
 			:warning "Non-negative number"
 			:owner t)
-		(define-parameter
-			:temporal-discount
-			:documentation "Temporal discount gamma"
-			:default-value *default-temporal-discounting*
-			:valid-test #'(lambda (gamma)
-							(and (numberp gamma)
-								 (> gamma 0)
-								 (<= gamma 1))))
 		(define-parameter
 			:temporal-discount
 			:documentation "Temporal discount gamma"
@@ -136,3 +133,43 @@
 		(define-parameter :esc :owner nil))
   :version "1.0a1"
   :documentation "First version of RL module")
+
+;;; OLD MATH MODULE CODE
+
+;;; This is just to remind myself how to implement a module
+
+(defun create-rl-module (model-name)
+  "Creates an RL module (instance of class ACT-RL"
+  (declare (ignore model-name))
+  (make-instance 'act-rl))
+
+(defun delete-rl-module (mod)
+  "Deletes the RL module"
+  (setf mod nil))
+
+(defun reset-rl-module (mdl)
+  "Resets the RL module (Does nothing for now)"
+  (when (and (current-model)
+			 mdl)
+	(let ((qtable (q-table mdl))
+		  (prods (no-output pp)))
+	  (loop for prod in prods do
+		   (set-q-value prod *default-default-q-value*))))) 
+		   
+
+;;; MATH-MODULE-QUERY
+;;; --------------------------------------------------------------
+;;; A query that handles the basic state checks, i.e. state free,
+;;; busy, error.  
+;;; --------------------------------------------------------------
+(defun rl-module-query (mod buffer slot value)
+  "Simple query function for the math module"
+  (case slot
+    (state
+     (case value
+       (error nil)
+       (busy (math-module-busy mod))
+       (free (not (math-module-busy mod)))
+       (t (print-warning "Bad state query to ~s buffer" buffer))))
+    (t (print-warning 
+     "Invalid slot ~s in query to buffer ~s" query buffer))))
