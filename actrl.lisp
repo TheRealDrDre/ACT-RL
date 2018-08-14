@@ -1,5 +1,30 @@
-;;; ACT-RL / Reinforcement Learning library for ACT-R
-;;; Implements standard RL algorithms in ACT-R
+;;;  -*- mode: LISP; Syntax: COMMON-LISP;  Base: 10 -*-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
+;;; Author      : Andrea Stocco
+;;;
+;;; Address     : Department of Psychology 
+;;;             : University of Washington
+;;;             : Seattle, WA 98195
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
+;;; Filename    : actrl.lisp
+;;; Version     : 0.1
+;;; 
+;;; Description : A module that provides ACT-R with basic, classic Rl algorithms.
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
+;;; ----- History -----
+;;;
+;;; 2018-08-10  : * Created and started github code
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; ------------------------------------------------------------------
+;;; PARAMETERS
+;;; ------------------------------------------------------------------
 
 (defparameter *default-learning-rate* 0.1)
 
@@ -7,11 +32,14 @@
 
 (defparameter *default-default-q-value* 0)
 
-(defparameter *default-on-policy* t) 
+(defparameter *default-on-policy* t)
 
-(defun production-name? (name)
-  "Checks whether a string names a production"
-  t)
+(defparameter *default-temperature* 0.001)
+
+
+;;; ------------------------------------------------------------------
+;;; UTILITIES
+;;; ------------------------------------------------------------------
 
 (defun seq (start end &optional (step 1))
   "Creates a list with a range of numbers"
@@ -39,16 +67,21 @@
 							 cum-probs)))
 	(length limited)))
 
-;;; Data structures
+;;; ------------------------------------------------------------------
+;;; MODULE AND DATA STRUCTURES
+;;; ------------------------------------------------------------------
+;;; The module is just a collection of parameters and parametrized
+;;; data structures.
+;;; ------------------------------------------------------------------
 
-(defclass act-rl-module ()
-  ((q-table :accessor q-table
-			:initform (make-hash-table))
-   (p-history :accessor p-history
-			  :initform nil)
-   (q-history :accessor q-history
-			  :initform nil))
-  (:documentation "An ACT-R module that replaces utility with classic Q-values "))
+(defstruct rl-module
+  ;; Parameters
+  temperature learning-rate
+  temporal-discount default-q-value
+  on-policy depth
+ 
+  ;; Structures
+  q-table p-history q-history)
 
 
 (defun q-list? (lst)
@@ -61,22 +94,30 @@
 
 (defmethod q-value (prod)
   "Returns the q-value associated with a give production in a Q-module"
-  (let ((mod (get-module 'actrl)))
+  (let ((mod (get-module 'rl)))
 	(unless (null mod)
 	  (let ((qtable (q-table mod)))
 		(unless (member prod (hash-table-keys qtable))
-		  (let ((
-				 (setf (gethash prod qtable) 
-					   ())))))))))
+		  (setf (gethash prod qtable)
+				(default-q-value mod)))
+		(gethash prod qtable)))))
 
-(defmethod set-q-value (prod)
-  ())
-					   
-(defun create-q-list (cset)
+
+(defmethod set-q-value (prod qval)
+  "Sets the q-value associated with a give production in a Q-module"
+  (let ((mod (get-module 'rl)))
+	(unless (null mod)
+	  (let ((qtable (q-table mod)))
+		(setf (gethash prod qtable)
+			  qval)))))
+
+
+(defun create-q-list (c-set)
   "Creates an production/q-value assoc list from a conflict set"
   (mapcar #'(lambda (x)
 			  (cons x (q-value x)))
-		  cset))
+		  c-set))
+
 
 (defun boltzmann-policy (qlist temp)
   "Chooses a production with probability proportional to its Q-value" 
@@ -100,6 +141,29 @@
 		   (* -1 q)))))
 
 
+;;; This is just to remind myself how to implement a module
+
+(defun create-rl-module (model-name)
+  "Creates an RL module (instance of class ACT-RL"
+  (declare (ignore model-name))
+  (make-rl-module))
+
+
+(defun delete-rl-module (mod)
+  "Deletes the RL module"
+  (setf mod nil))
+
+
+(defun reset-rl-module (mdl)
+  "Resets the RL module (Does nothing for now)"
+  (when (and (current-model)
+			 mdl)
+	(let ((def-q (rl-module-default-q-value mdl))
+		  (prods (no-output (pp))))
+	  (loop for prod in prods do
+		   (set-q-value prod def-q)))))
+
+
 (define-module-fct 'rl '()
   (list (define-parameter
 			:learning-rate
@@ -110,6 +174,7 @@
 								 (>= alpha 0)))
 			:warning "Non-negative number"
 			:owner t)
+		
 		(define-parameter
 			:temporal-discount
 			:documentation "Temporal discount gamma"
@@ -118,6 +183,15 @@
 							(and (numberp gamma)
 								 (> gamma 0)
 								 (<= gamma 1))))
+
+		(define-parameter
+			:temperature
+			:documentation "Temperature T in Boltzmann selection"
+			:default-value *default-temperature*
+			:valid-test #'(lambda (x)
+							(and (numberp x)
+								 (plusp x))))
+		
 		(define-parameter
 			:default-q-value
 			:documentation "Initial Q-value of a production"
@@ -134,30 +208,8 @@
   :version "1.0a1"
   :documentation "First version of RL module")
 
-;;; OLD MATH MODULE CODE
 
-;;; This is just to remind myself how to implement a module
-
-(defun create-rl-module (model-name)
-  "Creates an RL module (instance of class ACT-RL"
-  (declare (ignore model-name))
-  (make-instance 'act-rl))
-
-(defun delete-rl-module (mod)
-  "Deletes the RL module"
-  (setf mod nil))
-
-(defun reset-rl-module (mdl)
-  "Resets the RL module (Does nothing for now)"
-  (when (and (current-model)
-			 mdl)
-	(let ((qtable (q-table mdl))
-		  (prods (no-output pp)))
-	  (loop for prod in prods do
-		   (set-q-value prod *default-default-q-value*))))) 
-		   
-
-;;; MATH-MODULE-QUERY
+;;; MODULE-QUERY
 ;;; --------------------------------------------------------------
 ;;; A query that handles the basic state checks, i.e. state free,
 ;;; busy, error.  
